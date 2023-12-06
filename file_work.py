@@ -1,9 +1,9 @@
 def escreve(nomes):
-    arquivo = open('my_name.txt', 'a', encoding='utf-8')
+    arquivo = open('banco.txt', 'a', encoding='utf-8')
     arquivo.write(nomes)
 
 def ler():
-    arquivo = open('my_name.txt', 'r', encoding='utf-8')
+    arquivo = open('banco.txt', 'r', encoding='utf-8')
     nomes = arquivo.read()
     lista = nomes.split(';')
     for n in lista:
