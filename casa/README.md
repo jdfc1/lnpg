@@ -1,4 +1,4 @@
-O tkinter é um módulo padrão do Python que fornece ferramentas para criar interfaces gráficas de usuário (GUI). Aqui estão algumas das principais funções e classes do tkinter:
+## O tkinter é um módulo padrão do Python que fornece ferramentas para criar interfaces gráficas de usuário (GUI). Aqui estão algumas das principais funções e classes do tkinter:
 
 1. Tk() e Toplevel(): São classes que representam as janelas principais e as janelas secundárias, respectivamente.
 
