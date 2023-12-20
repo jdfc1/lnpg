@@ -1,6 +1,6 @@
 from tkinter import *
-from tkinter import ttk
-import sqlite3
+from tkinter import ttk, messagebox
+import sqlite3, random
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, A4
@@ -8,6 +8,8 @@ from reportlab.pdfbase import pdfmetrics
 from fontTools.ttLib import TTFont # pip3 install fonttools
 from reportlab.platypus import SimpleDocTemplate, Image
 import webbrowser
+#from PIL import ImageTK, Image
+#import base64
 
 root = Tk()
 
@@ -23,7 +25,20 @@ class Relatorios():
         self.cidadeRel = self.cidade_entry.get()
         self.telefoneRel = self.telefone_entry.get()
 
+        self.c.setFont("Helvetica-Bold", 24)
+        self.c.drawString(200, 790, 'Ficha do Cliente')
 
+        self.c.setFont("Helvetica", 17)
+        self.c.drawString(50, 700, f'Código: {self.codigoRel}')
+        self.c.drawString(50, 670, f'Nome: {self.nomeRel}')
+        self.c.drawString(50, 640, f'Cidade: {self.cidadeRel}')
+        self.c.drawString(50, 610, f'Telefone: {self.telefoneRel}')
+
+        self.c.rect(20, 550, 550, 5, fill=True, stroke=False)
+
+        self.c.showPage()
+        self.c.save()
+        self.printCliente()
 
 
 class Funcs():
@@ -62,20 +77,27 @@ class Funcs():
     
     def add_cliente(self):
         self.variaveis() # chamando todas as variáveis da função.
-        self.conecta_db()
+        
+        if self.nome == "" or self.cidade == "" or self.telefone == "":
+            messagebox.showinfo(title='Atenção', message='Preencha os 3 campos: Nome, Cidade e Telefone')
+        else:
+            self.conecta_db()
+            self.cursor.execute(""" INSERT INTO clientes (nome_cliente, cidade, telefone) 
+                VALUES (?, ?, ?) """, (self.nome, self.cidade, self.telefone))
 
-        self.cursor.execute(""" INSERT INTO clientes (nome_cliente, cidade, telefone) 
-            VALUES (?, ?, ?) """, (self.nome, self.cidade, self.telefone))
-
-        self.conn.commit()
-        self.desconectar_db()
-        self.select_lista()
-        self.limpa_tela()
+            self.conn.commit()
+            self.desconectar_db()
+            self.select_lista()
+            self.limpa_tela()
+            self.contador_cliente()
+            messagebox.showinfo(title='Atenção', message='Cadastrado com Sucesso')
     
     def select_lista(self):
         self.listaCli.delete(*self.listaCli.get_children())
         self.conecta_db()
-        lista = self.cursor.execute(""" SELECT cod, nome_cliente, cidade, telefone FROM clientes ORDER BY nome_cliente ASC; """)
+        lista = self.cursor.execute("""
+         SELECT cod, nome_cliente, cidade, telefone FROM clientes ORDER BY nome_cliente ASC; 
+        """)
 
         for i in lista:
             self.listaCli.insert("", END, values=i)
@@ -94,26 +116,86 @@ class Funcs():
             self.telefone_entry.insert(END, col4)
     
     def deleta_cliente(self):
-        self.variaveis()
-        self.conecta_db()
-        self.cursor.execute(""" DELETE FROM clientes WHERE cod = ? """, (self.codigo))
-        self.conn.commit()
-        self.desconectar_db()
-        self.limpa_tela()
-        self.select_lista()
+        self.variaveis()            
+        resposta = messagebox.askyesno(title='Informativo', message='Você tem certeza disso?')
+        if resposta == True:
+            self.conecta_db()
+            self.cursor.execute(""" DELETE FROM clientes WHERE cod = ? ;""", (self.codigo,))
+            self.conn.commit()
+            self.desconectar_db()
+            self.limpa_tela()
+            self.select_lista()
+            messagebox.showinfo(title='Confirmação', message='Realmente, não era para estar aqui.')
+        else: 
+            messagebox.showinfo(title='Confirmação', message='Ufa, menos mal. Eu também não queria fazer isso!')
     
     def alterar_cliente(self):
         self.variaveis()
+        if self.nome == "" or self.cidade == "" or self.telefone == "":
+            messagebox.showinfo(title='Atenção', message='Preencha os 3 campos: Nome, Cidade e Telefone')
+        else: 
+            self.conecta_db()
+
+            self.cursor.execute("""
+            UPDATE clientes SET nome_cliente = ?, cidade = ?, telefone = ? WHERE cod = ? ;
+            """, (self.nome, self.cidade, self.telefone, self.codigo))
+
+            self.conn.commit()
+            self.desconectar_db()
+            self.limpa_tela()
+            self.select_lista()
+            messagebox.showinfo(title='Atenção', message='Alteração foi concluída')
+    
+    def buscar_cliente(self):
         self.conecta_db()
-        self.cursor.execute(""" UPDATE clientes SET nome_cliente = ?, cidade = ?, telefone = ? WHERE cod = ? """, 
-        (self.nome, self.cidade, self.telefone, self.codigo))
-        self.conn.commit()
+        self.listaCli.delete(*self.listaCli.get_children()) # limpar a lista
+        
+        self.nome_entry.insert(END, '%') # inserir o sinal de percentagem ao final da string
+        nome = self.nome_entry.get() # recebendo o valor do já com o % no final
+        # print(nome)
+        self.cursor.execute(
+            """
+            SELECT cod, nome_cliente, cidade, telefone FROM clientes
+            WHERE nome_cliente LIKE '%s' ORDER BY nome_cliente ASC
+            """ % nome) # referênciando a variável dentro do select
+        buscanomeCli = self.cursor.fetchall() # recuperando os dados
+        for i in buscanomeCli: 
+            self.listaCli.insert("", END, values=i) # inserir a pesquisa dentro da lista
+        self.limpa_tela() # limpar tela
+        self.desconectar_db() # desconectar o banco
+    
+    def randon_cliente(self):
+        self.conecta_db()
+        #self.listaCli.delete(*self.listaCli.get_children()) # apagar a lista
+
+        self.cursor.execute(
+            """ SELECT nome_cliente FROM clientes """ )
+        todos_nomes = self.cursor.fetchall()
+
+        result = random.choice(todos_nomes)
+        #print(result)
+        messagebox.showinfo(title='O nome sorteado foi? ', message=result)
+
         self.desconectar_db()
-        self.limpa_tela()
-        self.select_lista()
+    
+    def contador_cliente(self):
+        self.conecta_db()
+        self.cursor.execute(
+            """ SELECT COUNT(nome_cliente) FROM clientes """
+        )
+        qtd_banco = self.cursor.fetchall()
+
+        if qtd_banco:
+            tupla = qtd_banco[0]
+            if tupla:
+                numero = tupla[0]
+
+        self.qtd.config(text=f'Número de \nclientes: {numero}')
+
+        self.desconectar_db()
 
 
-class Application(Funcs):
+class Application(Funcs, Relatorios):
     def __init__(self):
         self.root = root
         self.tela()
@@ -123,6 +205,8 @@ class Application(Funcs):
         self.montarTabelas()
         self.select_lista()
         self.Menus()
+        self.contador_cliente()
+
         root.mainloop()
     
     def tela(self):
@@ -146,20 +230,25 @@ class Application(Funcs):
         self.bt_limpar.place(relx=0.2, rely=0.1, relwidth=0.1, relheight=0.15)
 
         # buscar
-        self.bt_limpar = Button(self.frame_1, text="Buscar")
-        self.bt_limpar.place(relx=0.3, rely=0.1, relwidth=0.1, relheight=0.15)
+        self.bt_buscar = Button(self.frame_1, text="Buscar", command=self.buscar_cliente)
+        self.bt_buscar.place(relx=0.3, rely=0.1, relwidth=0.1, relheight=0.15)
 
         # Novo
-        self.bt_limpar = Button(self.frame_1, text="Novo", command=self.add_cliente)
-        self.bt_limpar.place(relx=0.6, rely=0.1, relwidth=0.1, relheight=0.15)
+        self.bt_novo = Button(self.frame_1, text="Novo", command=self.add_cliente)
+        self.bt_novo.place(relx=0.6, rely=0.1, relwidth=0.1, relheight=0.15)
 
         # Alterar
         self.bt_limpar = Button(self.frame_1, text="Alterar", command=self.alterar_cliente)
         self.bt_limpar.place(relx=0.7, rely=0.1, relwidth=0.1, relheight=0.15)
 
+        # randon
+        self.bt_randon = Button(self.frame_1, text="Randon", command=self.randon_cliente)
+        self.bt_randon.place(relx=0.7, rely=0.3, relwidth=0.1, relheight=0.15)
+
         # Apagar
-        self.bt_limpar = Button(self.frame_1, text="Apagar", command=self.deleta_cliente)
-        self.bt_limpar.place(relx=0.8, rely=0.1, relwidth=0.1, relheight=0.15)
+        self.bt_apagar = Button(self.frame_1, text="Apagar", command=self.deleta_cliente)
+        self.bt_apagar.place(relx=0.8, rely=0.1, relwidth=0.1, relheight=0.15)
+    
     
         # label código
         self.lb_codigo = Label(self.frame_1, text="Código")
@@ -167,6 +256,11 @@ class Application(Funcs):
         #Entry
         self.codigo_entry = Entry(self.frame_1)
         self.codigo_entry.place(relx=0.05, rely=0.15, relwidth=0.08)
+
+
+
+        self.qtd = Label(self.frame_1, text="", font=("Arial 15"))
+        self.qtd.place(relx=0.55, rely=0.5, relwidth=0.4, relheight=0.15)
 
 
         # label nome
@@ -227,5 +321,7 @@ class Application(Funcs):
 
         filemenu.add_command(label = "Sair", command = Quit)
         filemenu2.add_command(label= "Limpa Cliente", command = self.limpa_tela)
+
+        filemenu2.add_command(label= "Ficha do Cliente", command = self.geraRelatCliente)
 
 Application()

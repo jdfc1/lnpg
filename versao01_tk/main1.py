@@ -1,9 +1,9 @@
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 def clicked():
     nome_album = t1.get()
-    ano_lancamento = int(t2.get())
+    ano_lancamento = t2.get()
     nome_banda = t3.get()
     lancamento = v0.get()
     if lancamento == 1:
@@ -16,13 +16,16 @@ def clicked():
     t3.delete(0, END)
 
     v0.set(2)
-
-    with open('/home/jdfc1/Documentos/lnpg/versao01_tk/banco1.txt', 'a', encoding='utf-8') as file:
-        file.write(f'{nome_banda};{nome_album};{ano_lancamento};{lanca}\n')
-        
-        file.close()
     
-    mostrandoNaTela("Dados Salvos")
+    if nome_album == "" or nome_banda == "" or ano_lancamento == "":
+        messagebox.showwarning(title='Informativo', message='Por favor, Preencha todos os campos.')
+    else:
+        with open('/home/jdfc1/Documentos/lnpg/versao01_tk/banco1.txt', 'a', encoding='utf-8') as file:
+            file.write(f'{nome_banda};{nome_album};{ano_lancamento};{lanca}\n')
+            
+            file.close()
+        
+        mostrandoNaTela("Dados Salvos")
 
 def reader():
     with open('/home/jdfc1/Documentos/lnpg/versao01_tk/banco1.txt', 'r', encoding='utf-8') as nome:
@@ -43,84 +46,90 @@ def buscador():
     dadosentra.delete(0, END)
     #print(busca)
 
-    try: 
-        with open('/home/jdfc1/Documentos/lnpg/versao01_tk/banco1.txt', 'r', encoding='utf-8') as file:
-            show = file.readlines()
+    if busca == "":
+        messagebox.showinfo(title='Informativo', message='Preencha o campo acima corretamente.')
+    else: 
+        try: 
+            with open('/home/jdfc1/Documentos/lnpg/versao01_tk/banco1.txt', 'r', encoding='utf-8') as file:
+                show = file.readlines()
 
-            dados_lista = []
+                dados_lista = []
 
-            for espaco in show:
-                banda, album, ano, lancamento = espaco.strip().split(';')
-                lancamento = lancamento.replace('\n', '')
-                dados_lista.append(f'{banda} - {album} - {ano} - {lancamento}')
+                for espaco in show:
+                    banda, album, ano, lancamento = espaco.strip().split(';')
+                    lancamento = lancamento.replace('\n', '')
+                    dados_lista.append(f'{banda} - {album} - {ano} - {lancamento}')
 
-                encontrei = []
+                    encontrei = []
 
-                for imprimir in dados_lista:
-                    if busca in imprimir.lower():
-                        encontrei.append(f'{imprimir}\n')
+                    for imprimir in dados_lista:
+                        if busca in imprimir.lower():
+                            encontrei.append(f'{imprimir}\n')
+                    
                 
-            
-            mostrandoNaTela(encontrei)
-            file.close()
+                mostrandoNaTela(encontrei)
+                file.close()
 
-    except FileNotFoundError:
-        mostrandoNaTela("Arquivo não foi encontrado.")
+        except FileNotFoundError:
+            mostrandoNaTela("Arquivo não foi encontrado.")
 
 def buscadorANO():
 
-    try: 
-        with open('/home/jdfc1/Documentos/lnpg/versao01_tk/banco1.txt', 'r', encoding='utf-8') as file:
-            show = file.readlines()
+    vem_do_Radiobutton = vv0.get()
+    vem_do_Combobox = combo.get()
 
-            dados_lista = []
+    if (vem_do_Combobox == ""):
+        messagebox.showwarning(title='Informativo', message='Informe o ano dejado para pesquisa.')
+    else:
+        try: 
+            with open('/home/jdfc1/Documentos/lnpg/versao01_tk/banco1.txt', 'r', encoding='utf-8') as file:
+                show = file.readlines()
 
-            for espaco in show:
-                banda, album, ano, lancamento = espaco.strip().split(';')
-                lancamento = lancamento.replace('\n', '')
-                dados_lista.append(f'{banda} - {album} - {ano} - {lancamento}')
-            
-            file.close()
-            
-            vem_do_Radiobutton = vv0.get()
-            vem_do_Combobox = combo.get()
+                dados_lista = []
 
-            ano_pesquisa = int(vem_do_Combobox)
-            ano_inicial = 1970
-            ano_final = 2023
-            
-            if (vem_do_Radiobutton == 1):
-                encontrei = []
-
-                for imprimir in dados_lista:
-                    ano = int(imprimir.split(" - ")[2])
-                    if ano_inicial <= ano <= ano_pesquisa:
-                        encontrei.append(f'{imprimir}\n')
+                for espaco in show:
+                    banda, album, ano, lancamento = espaco.strip().split(';')
+                    lancamento = lancamento.replace('\n', '')
+                    dados_lista.append(f'{banda} - {album} - {ano} - {lancamento}')
                 
-                mostrandoNaTela(encontrei)
+                file.close()
 
-            elif (vem_do_Radiobutton == 2):
-                encontrei = []
-
-                for imprimir in dados_lista:
-                    ano = int(imprimir.split(" - ")[2])
-                    if ano_pesquisa <= ano <= ano_final:
-                        encontrei.append(f'{imprimir}\n')
+                ano_pesquisa = int(vem_do_Combobox)
+                ano_inicial = 1970
+                ano_final = 2023
                 
-                mostrandoNaTela(encontrei)
+                if (vem_do_Radiobutton == 1):
+                    encontrei = []
 
-            elif (vem_do_Radiobutton == 3):
-                encontrei = []
+                    for imprimir in dados_lista:
+                        ano = int(imprimir.split(" - ")[2])
+                        if ano_inicial <= ano <= ano_pesquisa:
+                            encontrei.append(f'{imprimir}\n')
+                    
+                    mostrandoNaTela(encontrei)
 
-                for imprimir in dados_lista:
-                    ano = int(imprimir.split(" - ")[2])
-                    if ano_pesquisa == ano:
-                        encontrei.append(f'{imprimir}\n')
-                
-                mostrandoNaTela(encontrei)
+                elif (vem_do_Radiobutton == 2):
+                    encontrei = []
 
-    except FileNotFoundError:
-        mostrandoNaTela("Arquivo não foi encontrado.")
+                    for imprimir in dados_lista:
+                        ano = int(imprimir.split(" - ")[2])
+                        if ano_pesquisa <= ano <= ano_final:
+                            encontrei.append(f'{imprimir}\n')
+                    
+                    mostrandoNaTela(encontrei)
+
+                elif (vem_do_Radiobutton == 3):
+                    encontrei = []
+
+                    for imprimir in dados_lista:
+                        ano = int(imprimir.split(" - ")[2])
+                        if ano_pesquisa == ano:
+                            encontrei.append(f'{imprimir}\n')
+                    
+                    mostrandoNaTela(encontrei)
+
+        except FileNotFoundError:
+            mostrandoNaTela("Arquivo não foi encontrado.")
 
 def mostrandoNaTela(dados):
     texto.delete(1.0, 'end')
@@ -129,7 +138,7 @@ def mostrandoNaTela(dados):
 
 
 win = Tk()
-win.title('organizador de albuns')
+win.title('Organizador de Albuns')
 win.geometry("710x650+10+10")
 win.resizable(True, True)
 win.maxsize(width=730, height=730)

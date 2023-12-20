@@ -5,3 +5,9 @@ detonautas;ao vivo;2004;não é lançamento
 Charlie Brown Jr.;Preço curto prazo Longo;2004;não é lançamento
 Linkin Park;Xero Demo;1996;é lançamento
 Linkin Park;Meteora;2005;não é lançamento
+CPM22;Suor e Sacrifício;2017;não é lançamento
+Legião Urbana;Dois;1986;não é lançamento
+Linkin Park;Live in Texas;2003;não é lançamento
+Disturbed;imortalized;2005;não é lançamento
+sdfdsf;dfsdf;234;não é lançamento
+Imortalized;Disturbed;2019;não é lançamento
