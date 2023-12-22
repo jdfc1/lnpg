@@ -6,10 +6,13 @@ commit: add
 	git commit -m " -> Enviado no dia $(TAG)."
 push: 	commit
 	git push
-custom_commit: add
-	git commit -m " -> $M para o repositório online."
 
-.PHONY: add commit push custom_commit
+custom_commit:	add
+	git commit -m " -> $M para o repositório online."
+custom_push:	custom_commit
+	git push
+
+.PHONY: add commit push custom_commit custom_push
 
 # você pode chamar ( make custom_commit M='sua mensagem aqui' ) 
 # para realizar um commit com a mensagem personalizada.

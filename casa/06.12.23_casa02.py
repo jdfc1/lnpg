@@ -12,6 +12,8 @@ root.mainloop() """
 # exemplo 2
 root = Tk()
 
+
+
 topFrame = Frame(root)
 topFrame.pack()
 bottomFrame = Frame(root)
