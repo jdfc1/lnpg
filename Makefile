@@ -1,14 +1,14 @@
-TAG=$(shell date +%d.%m.%Y)
+TAG=$(shell date +%d.%m.%Y-%A)
 
 add:	
 	git add .
 commit: add
-	git commit -m " -> Enviado no dia $(TAG)."
+	git commit -m "Enviado no dia $(TAG)."
 push: 	commit
 	git push
 
 custom_commit:	add
-	git commit -m " -> $M para o repositório online."
+	git commit -m "$M em $(TAG)"
 custom_push:	custom_commit
 	git push
 
